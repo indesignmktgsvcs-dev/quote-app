@@ -1,10 +1,9 @@
-// FitOut Quotation System — service worker
-// Offline is "nice to have" here, not required: this caches the app
-// shell (this page + icons) so it opens even with a weak/no signal,
-// and lets everything else (like the jsPDF library from its CDN)
-// fall through to the network normally.
+// INDesign Quotation System — service worker
+// Offline is "nice to have": caches the app shell so it opens even
+// with a weak/no signal, and lets everything else (like the jsPDF
+// library from its CDN) fall through to the network normally.
 
-const CACHE_NAME = 'fitout-quote-app-v1';
+const CACHE_NAME = 'indesign-quote-app-v1';
 const APP_SHELL = [
     './',
     './index.html',
@@ -34,17 +33,12 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
     const req = event.request;
-
-    // Only handle GET requests for our own origin's app shell files.
-    // Everything else (jsPDF CDN, etc.) goes straight to the network.
     const url = new URL(req.url);
     const isSameOrigin = url.origin === self.location.origin;
 
     if (req.method !== 'GET') return;
 
     if (isSameOrigin) {
-        // Cache-first for the app shell, so it opens instantly and
-        // works offline; falls back to network if not cached yet.
         event.respondWith(
             caches.match(req).then((cached) => {
                 if (cached) return cached;
@@ -58,8 +52,6 @@ self.addEventListener('fetch', (event) => {
             })
         );
     } else {
-        // Network-first for external resources (e.g. jsPDF CDN), with
-        // a cached fallback if one exists and the network is down.
         event.respondWith(
             fetch(req).then((response) => {
                 if (response && response.ok) {
